@@ -67,8 +67,7 @@ new_position := position.
 	( opCode = 3 ) ifTrue: [ codes at: ((codes at: position + 1) + 1) put: inputInteger.
 		                      new_position := position + 2. ].
 	( opCode = 4 ) ifTrue: [ Transcript show: '',(codes at: (codes at: position + 1) + 1 ) asString;cr.
-		new_position := position + 2. 
-		"self halt."].
+		 ^ (codes at: (codes at: position + 1) + 1) ].
 	 (#( 1 2 5 6 7 8) includes: opCode ) ifTrue: [ 
 		valueOne := self defineValue: firstParameterMode codes: codes parameter: (codes at: position + 1).
 		valueTwo := self defineValue: secondParameterMode codes: codes parameter: (codes at: position + 2).
@@ -90,4 +89,58 @@ new_position := position.
 	position := new_position.
 ]
 
+]
+
+{ #category : #puzzles }
+Day05 >> partTwoWithCustomInput: aProgram inputs: someInputs [
+ | codes position opCode valueOne valueTwo firstParameterMode secondParameterMode thirdParameterMode instruction new_position inputsIndex output |
+codes := aProgram.
+inputsIndex := 1.
+position := 1.
+opCode := -1.
+output := -1.
+new_position := position.
+[ opCode ~= 99 ] whileTrue: [ 
+	instruction := (codes at: position) printPaddedWith: $0 to: 5. "or use modulo..."
+   opCode := (instruction copyFrom: 4 to: 5) asInteger.
+   firstParameterMode := instruction at: 3.
+   secondParameterMode := instruction at: 2.
+   thirdParameterMode := instruction at: 1.
+   
+	( opCode = 99) ifTrue: [ ^output ].
+	( opCode = 3 ) ifTrue: [ codes at: ((codes at: position + 1) + 1) put: (someInputs at: inputsIndex).
+		                      inputsIndex := inputsIndex + 1.
+		                      new_position := position + 2. ].
+	( opCode = 4 ) ifTrue: [
+		 output :=  self defineValue: firstParameterMode codes: codes parameter: (codes at: position + 1).
+		  new_position := position + 2].
+	 (#( 1 2 5 6 7 8) includes: opCode ) ifTrue: [ 
+		valueOne := self defineValue: firstParameterMode codes: codes parameter: (codes at: position + 1).
+		valueTwo := self defineValue: secondParameterMode codes: codes parameter: (codes at: position + 2).
+		 ].
+	( opCode = 1 ) ifTrue: [ codes at: ((codes at: (position + 3)) + 1) put: (valueOne + valueTwo).
+		new_position := position + 4 ].
+	( opCode = 2 ) ifTrue: [ codes at: ((codes at: (position + 3)) + 1) put: (valueOne * valueTwo).
+		new_position := position + 4 ].
+	( opCode = 5 ) ifTrue: [ (valueOne ~= 0) ifTrue: [ new_position := (valueTwo + 1) ]
+		                                      ifFalse: [ new_position := (position + 3) ] ].
+	( opCode = 6 ) ifTrue: [ (valueOne = 0) ifTrue: [ new_position := (valueTwo + 1)]
+		                                     ifFalse: [ new_position := (position + 3)]].
+	( opCode = 7 ) ifTrue: [ (valueOne < valueTwo) ifTrue: [ codes at: (codes at: position + 3) + 1 put: 1 ]
+		                                            ifFalse: [ codes at: (codes at: position + 3) + 1 put: 0 ]. 
+		                      new_position := position + 4 ].
+	( opCode = 8 ) ifTrue: [ (valueOne = valueTwo) ifTrue: [ codes at: (codes at: position + 3) + 1 put: 1 ]
+		                                            ifFalse: [ codes at: (codes at: position + 3) + 1 put: 0 ]. 
+		                      new_position := position + 4 ].
+	( #(1 2 3 4 5 6 7 8 99) includes: opCode) ifFalse: [ self halt. ].
+	position := new_position.
+].
+
+]
+
+{ #category : #tests }
+Day05 >> testInputStringBelowOrAboveEight [
+	^'3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
+1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
+999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99'
 ]
